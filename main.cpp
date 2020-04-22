@@ -1,3 +1,59 @@
+// ======================================================================
+// FILE:        Main.cpp
+//
+// AUTHOR:      Jian Li
+//
+// DESCRIPTION: This file is the entry point for the program. The main
+//              function serves a couple purposes: (1) It is the
+//              interface with the command line. (2) It reads the files,
+//              creates the World object, and passes that all the
+//              information necessary. (3) It is in charge of outputing
+//              information.
+//
+// NOTES:       - Syntax:
+//
+//                	Minesweeper [Options] [InputFile] [OutputFile]
+//
+//                  Options:
+//						-m Use the ManualAI instead of MyAI.
+//						-r Use the RandomAI instead of MyAI.
+//                      -d Debug mode, which displays the game board
+//                         after every mode. Useless with -m.
+//                      -v Verbose mode displays world file names before
+//                         loading them.
+//                      -f Depending on the InputFile format supplied,
+//                         this operand will trigger program
+//                         1) Treats the InputFile as a folder containing many worlds.
+//                         The program will then construct a world for every valid world file found.
+//                         The program to display total score instead of a single score.
+//                         The InputFile operand must be specified with this option
+//                         2) Threats the inputFile as a file.
+//                         The program will then construct a world for a single valid world file found.
+//                         The program to display a single score.
+//
+//                  InputFile: A path to a valid Minesweeper File, or
+//                             folder with -f.
+//
+//                  OutputFile: A path to a file where the results will
+//                              be written. This is optional.
+//
+//              - If -m and -r are turned on, -m will be turned off.
+//
+//              - Don't make changes to this file.
+// ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
 #include <iostream>
 #include <dirent.h>
 #include <cmath>
