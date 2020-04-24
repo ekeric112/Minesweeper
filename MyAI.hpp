@@ -18,6 +18,18 @@ using namespace std;
 class MyAI : public Agent {
 public:
 
+    /*
+     * Member functions:
+     * create a Tile** board that holds tiles
+     *
+     */
+    // Tile structure
+    struct Tile {
+        bool uncovered = false; // the tile uncovered or not
+        bool flag = false; // the tile has been flag or not
+        int number;     // records number of bombs around
+    };
+
 
     /**
     * an AI capable of finishing the minesweeper game by itself within a time limit
@@ -33,7 +45,8 @@ public:
     * Uses the parameter to judge what move to make, also keeps track of how long the move
     * was and how much time is left
     *
-    * @param number Label of the tile that says how many mines are near it
+    * @param number Label of the tile that says how many mines are near it, -1 if
+     * previous move was flag/unflag
     * @return an Action on a specific tile
     */
     Action getAction(int number) override;
@@ -43,7 +56,7 @@ public:
     //other functions needed
     // ======================================================================
 
-    /**
+    /*
      *
      * void uncoverNeighbors(int c, int r);
      * void guess();
