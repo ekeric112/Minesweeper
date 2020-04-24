@@ -55,6 +55,8 @@ Agent::Action MyAI::getAction( int number )
 
 
 
+
+
     return {LEAVE,-1,-1};
     // ======================================================================
     // YOUR CODE ENDS

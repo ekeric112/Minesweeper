@@ -38,13 +38,18 @@ public:
     */
     Action getAction(int number) override;
 
-
     // ======================================================================
     // YOUR CODE BEGINS
     //other functions needed
     // ======================================================================
 
-
+    /**
+     *
+     * void uncoverNeighbors(int c, int r);
+     * void guess();
+     * bool isInBounds(int c, int r);
+     *
+     */
 
     // ======================================================================
     // YOUR CODE ENDS
