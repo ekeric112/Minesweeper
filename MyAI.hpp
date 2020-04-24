@@ -27,7 +27,8 @@ public:
     struct Tile {
         bool uncovered = false; // the tile uncovered or not
         bool flag = false; // the tile has been flag or not
-        int number;     // records number of bombs around
+        int ogNumber;     // original number of tile
+        int changeNumber; //OG number - # of flags it is touching
     };
 
 
