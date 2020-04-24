@@ -17,24 +17,42 @@
 //                be lost when the tournament runs your code.
 // ======================================================================
 
+
+/*
+ * 4/22/2020: Eric: try to finish implementing constructor
+ * Shangyi: come up with functions that should be inside getAction
+ *
+ *
+ */
+
+
 #include "MyAI.hpp"
+
+
 
 MyAI::MyAI ( int _rowDimension, int _colDimension, int _totalMines, int _agentX, int _agentY ) : Agent()
 {
     // ======================================================================
     // YOUR CODE BEGINS
     // ======================================================================
+    rowDimension = _rowDimension;
+    colDimension = _colDimension;
+    totalMines = _totalMines;
+    agentX = _agentX;
+    agentY = _agentY;
 
     // ======================================================================
     // YOUR CODE ENDS
     // ======================================================================
 };
 
+
 Agent::Action MyAI::getAction( int number )
 {
     // ======================================================================
     // YOUR CODE BEGINS
     // ======================================================================
+
 
 
     return {LEAVE,-1,-1};
