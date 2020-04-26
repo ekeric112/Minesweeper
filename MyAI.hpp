@@ -32,6 +32,10 @@ public:
     };
 
 
+    //MyAI variables
+    Tile** board; //board for the myAI to keep track of, update as game progresses
+
+
     /**
     * an AI capable of finishing the minesweeper game by itself within a time limit
     * @param _rowDimension # of rows in the game
@@ -62,9 +66,6 @@ public:
      * void uncoverNeighbors(int c, int r);
      * void guess();
      * bool isInBounds(int c, int r);
-     *
-     *
-     *
      */
 
     // ======================================================================
