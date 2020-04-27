@@ -246,12 +246,6 @@ void World::addNeighbour( int c, int r)
 {
     // helper function for addMineCount
     // iterate 8 neighbours around a tile, and increment neighbour if there is mine
-    /*
-     * How do i do this
-     *
-     *
-     *
-     */
 
     int dir[8][2] = { {-1, 1}, {-1, 0}, {-1 , -1},
                       {0, 1},          {0, -1},
