@@ -34,13 +34,10 @@ public:
 
 
     Action getAction(int number) override;
-
     Action uncoverNeighbor(); // UNCOVER the first neighbor that is covered
     Action findCovered(); // walk through the board to find the first covered && next_to_zero tile
 
     Tile **myBoard; // create our own board
-
-    bool next_to_zero(int c, int r);
 
     bool isInBounds(int c, int r);
 
