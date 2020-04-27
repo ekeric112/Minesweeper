@@ -41,6 +41,20 @@ MyAI::MyAI ( int _rowDimension, int _colDimension, int _totalMines, int _agentX,
 
 };
 
+/*
+ * I use a different order to UNCOVER the tiles
+ *
+ * The order we talked about at the meeting:
+ * uncover ALL neighbors of the initial tile, then start over from the first tile on the board
+ * to find the first covered && next_to_zero tile
+ *
+ * The order I use:
+ * uncover the FIRST covered neighbor of a tile,
+ * if find a 0, uncover that 0's FIRST covered neighbor, repeat
+ * if find a 1 or all neighbors are covered, start over from the first tile on the board to find
+ * the first covered && next_to_zero tile
+ *
+ */
 
 Agent::Action MyAI::getAction( int number )
 {
