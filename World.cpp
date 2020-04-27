@@ -119,6 +119,8 @@ int World::run()
         if ( debug || dynamic_cast<ManualAI*>(agent))
         {
             printWorldInfo();
+            //TODO delete later
+            agent->printMyWorldInfo();
 
             if ( !dynamic_cast<ManualAI*>(agent) )
             {
