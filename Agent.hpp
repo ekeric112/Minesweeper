@@ -35,6 +35,9 @@ public:
                     int number
             ) = 0;
 
+    //TODO delete later
+    virtual void printMyWorldInfo() =0;
+
 };
 
 

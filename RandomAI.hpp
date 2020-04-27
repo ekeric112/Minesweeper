@@ -12,6 +12,10 @@
 
 class RandomAI : public Agent {
 public:
+    //todo delete later
+    void printMyWorldInfo() override {
+
+    }
 
     RandomAI(int _rowDimension, int _colDimension, int _totalMines, int _agentX, int _agentY) {
         rowDimension = _rowDimension;
