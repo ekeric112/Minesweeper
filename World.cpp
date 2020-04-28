@@ -120,22 +120,23 @@ int World::run()
         {
             printWorldInfo();
             //TODO delete later
-            agent->printMyWorldInfo();
 
-            if ( !dynamic_cast<ManualAI*>(agent) )
-            {
-                // Pause the game, only if manualAI isn't on
-                // because manualAI pauses for us
-                cout << "Press ENTER to continue..." << endl;
-                cin.ignore( 999, '\n');
-            }
+//            if ( !dynamic_cast<ManualAI*>(agent) )
+//            {
+//                // Pause the game, only if manualAI isn't on
+//                // because manualAI pauses for us
+//                cout << "Press ENTER to continue..." << endl;
+//                cin.ignore( 999, '\n');
+//            }
         }
 
         if (lastAction.action == Agent::UNCOVER)
             perceptNumber = board[agentX][agentY].number;
         else
             perceptNumber = -1;
+        //TODO current problem is that we take an extra move
         lastAction = agent->getAction( perceptNumber );
+//            agent->printMyWorldInfo();
 
         // Make the move
         gameOver = doMove();

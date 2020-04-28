@@ -39,34 +39,91 @@ MyAI::MyAI(int _rowDimension, int _colDimension, int _totalMines, int _agentX, i
 
     //initialize board with new tiles
     myBoard = new Tile *[colDimension];
-    for (int index = 0; index < colDimension; ++index)
+    for (int index = 0; index < colDimension; ++index) {
         myBoard[index] = new Tile[rowDimension];
+    }
+    unCoveredCount = 0; //for checking leave condition,
 
 }
 
 
 Agent::Action MyAI::getAction(int number) {
+    Action returnAction;
+    //if the previous action returned a number >= 0, then it was an uncover action
+    if (number >= 0) {
+        unCoveredCount++;
+    }
+
+
+    //dont return flag, unflag
+    //just uncover colDim*rowDim - totalMines, then leave
+    if (unCoveredCount == (colDimension * rowDimension - totalMines)) {
+        return {LEAVE, -1, -1};
+    }
+
+
+    //once ready, return these values
+    int returnX = -1;
+    int returnY = -1;
 
     myBoard[agentX][agentY].uncovered = true;
     myBoard[agentX][agentY].ogNumber = number;
+    if (!ready) { //TODO might? cause bug later. Before we are ready, changenumber = ognumber
+        myBoard[agentX][agentY].changeNumber = number;
+    }
+    ready = isReady();
 
-    while (!ready) {
+
+    if (!ready) {
         // if found a 0, UNCOVER neighbors
         if (number == 0) {
             //check clockwise around the number and uncover the first square that is still covered
-            return uncoverNeighbor();
+            returnAction = uncoverNeighbor();
         }
             // if found a 1, loop through the board to find a covered tile that is attached to a 0
         else if (number == 1) {
-            return findCovered();
+            returnAction = findCovered();
         }
+
+        return returnAction;
     }
 
     /*
-     * TODO:
+     * TODO: When it is flagged, the "uncover" is false. Watch out for this
      * READY
      *
+     * Ready: all covered tiles that are touching a zero are uncovered. Now, find all the tiles with a number of one
+     * that are only touching one tile.u
+     *
+     * in our version of flagging, we dont actually return the the flag "action". we flag it in MyBoard
+     * and then return the next uncover
      */
+
+
+
+    for (int r = 0; r < rowDimension; r++) {
+        for (int c = 0; c < colDimension; c++) {
+            //do something based off of the number on the square, for now only case: 1
+
+            if (myBoard[c][r].changeNumber > 0 && myBoard[c][r].changeNumber == coverSquareTouchingNum(c, r)) {
+                bool work = flagThemTiles(c, r, myBoard[c][r].changeNumber);
+                if (mydebug) {
+
+                    printMyWorldInfo();
+                }
+                if (!work) {
+                    cout << "error in flagtiles\n";
+                }
+                //after putting down flags, change changenumber of everyone
+                updateChangeFlag();
+            }
+
+
+        }
+    }
+    //after exiting for loop, all tiles in board have their correct changeNumber values
+    return findCovered();
+
 
     return {LEAVE, -1, -1};
 
@@ -87,7 +144,7 @@ Agent::Action MyAI::uncoverNeighbor() {
     for (int *i : dir) {
         int nc = agentX + i[0];
         int nr = agentY + i[1];
-        if (isInBounds(nc, nr) && !myBoard[nc][nr].uncovered) {
+        if (isInBounds(nc, nr) && !myBoard[nc][nr].uncovered && !myBoard[nc][nr].flag) {
             agentX = nc;
             agentY = nr;
             return {UNCOVER, nc, nr};
@@ -101,7 +158,7 @@ Agent::Action MyAI::findCovered() {
 
     for (int r = 0; r < rowDimension; r++)
         for (int c = 0; c < colDimension; c++)
-            if (!myBoard[c][r].uncovered) {
+            if (!myBoard[c][r].uncovered && !myBoard[c][r].flag) {
                 int dir[8][2] = {{-1, 1},
                                  {-1, 0},
                                  {-1, -1},
@@ -113,10 +170,10 @@ Agent::Action MyAI::findCovered() {
                 for (int *i : dir) {
                     int nc = c + i[0];
                     int nr = r + i[1];
-                    if (isInBounds(nc, nr) && myBoard[nc][nr].ogNumber == 0) {
-                    agentX = c;
-                    agentY = r;
-                    return {UNCOVER, c, r};
+                    if (isInBounds(nc, nr) && myBoard[nc][nr].changeNumber == 0) {
+                        agentX = c;
+                        agentY = r;
+                        return {UNCOVER, c, r};
                     }
                 }
             }
@@ -158,15 +215,11 @@ void MyAI::printMyWorldInfo() {
 void MyAI::printTileInfo(int c, int r) {
     string tileString;
 
-    if (myBoard[c][r].uncovered)
-//        if ( myBoard[c][r].mine )
-//            tileString.append("*");
-//        else
-//        {
+    if (myBoard[c][r].uncovered) {
         tileString.append(to_string(myBoard[c][r].ogNumber));
-
-//        }
-    else if (myBoard[c][r].flag)
+        tileString.append("/");
+        tileString.append(to_string(myBoard[c][r].changeNumber));
+    } else if (myBoard[c][r].flag)
         tileString.append("#");
     else
         tileString.append(".");
@@ -174,3 +227,113 @@ void MyAI::printTileInfo(int c, int r) {
     cout << setw(8) << tileString;
 
 }
+
+int MyAI::flagTouchingNum(int c, int r) {
+    int flagsTouchingCount = 0;
+    int dir[8][2] = {{-1, 1},
+                     {-1, 0},
+                     {-1, -1},
+                     {0,  1},
+                     {0,  -1},
+                     {1,  1},
+                     {1,  0},
+                     {1,  -1}};
+    //check around the given coordinate
+    for (int *i : dir) {
+        int nc = c + i[0];
+        int nr = r + i[1];
+        if (isInBounds(nc, nr) && myBoard[nc][nr].flag) {
+            flagsTouchingCount++;
+        }
+    }
+    return flagsTouchingCount;
+}
+
+int MyAI::coverSquareTouchingNum(int c, int r) {
+    int coveredCount = 0;
+    int dir[8][2] = {{-1, 1},
+                     {-1, 0},
+                     {-1, -1},
+                     {0,  1},
+                     {0,  -1},
+                     {1,  1},
+                     {1,  0},
+                     {1,  -1}};
+    //check around the given coordinate
+    for (int *i : dir) {
+        int nc = c + i[0];
+        int nr = r + i[1];
+        if (isInBounds(nc, nr) && !myBoard[nc][nr].uncovered && !myBoard[nc][nr].flag) {
+            coveredCount++;
+        }
+    }
+    return coveredCount;
+}
+
+bool MyAI::isReady() {
+    for (int r = 0; r < rowDimension; r++)
+        for (int c = 0; c < colDimension; c++)
+            if (!myBoard[c][r].uncovered && !myBoard[c][r].flag) {
+                int dir[8][2] = {{-1, 1},
+                                 {-1, 0},
+                                 {-1, -1},
+                                 {0,  1},
+                                 {0,  -1},
+                                 {1,  1},
+                                 {1,  0},
+                                 {1,  -1}};
+                for (int *i : dir) {
+                    int nc = c + i[0];
+                    int nr = r + i[1];
+                    if (isInBounds(nc, nr) && myBoard[nc][nr].changeNumber == 0) {
+                        return false;
+                    }
+                }
+            }
+
+    return true; // do not find any covered tile that is attached to a 0, ready to do the logic part
+}
+
+bool MyAI::flagThemTiles(int c, int r, int flagNum) {
+    int flagGood = false;
+    int tilesFlagged = 0;
+    int dir[8][2] = {{-1, 1},
+                     {-1, 0},
+                     {-1, -1},
+                     {0,  1},
+                     {0,  -1},
+                     {1,  1},
+                     {1,  0},
+                     {1,  -1}};
+    //check around the given coordinate
+    for (int *i : dir) {
+        int nc = c + i[0];
+        int nr = r + i[1];
+        if (isInBounds(nc, nr) && !myBoard[nc][nr].uncovered && !myBoard[nc][nr].flag) {
+            //if the flag is up, then its still covered
+            myBoard[nc][nr].flag = true;
+            tilesFlagged++;
+        }
+    }
+
+    if (tilesFlagged == flagNum) {
+        flagGood = true;
+    }
+
+    return flagGood;
+
+}
+
+void MyAI::updateChangeFlag() {
+    for (int r = 0; r < rowDimension; r++) {
+        for (int c = 0; c < colDimension; c++) {
+            if (myBoard[c][r].changeNumber > 0) {
+                myBoard[c][r].changeNumber = myBoard[c][r].ogNumber - flagTouchingNum(c, r);
+                if (mydebug)
+                    printMyWorldInfo();
+            }
+        }
+    }
+
+}
+
