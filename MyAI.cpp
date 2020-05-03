@@ -72,7 +72,7 @@ Agent::Action MyAI::getAction(int number) {
         myBoard[agentX][agentY].changeNumber = number;
     }
     ready = isReady();
-
+    updateChangeFlag();
 
     if (!ready) {
         // if found a 0, UNCOVER neighbors

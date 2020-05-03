@@ -18,7 +18,7 @@ using namespace std;
 
 class MyAI : public Agent {
 public:
-    bool mydebug = false;
+    bool mydebug = true;
 
     // Tile structure
     struct Tile {
