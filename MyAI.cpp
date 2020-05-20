@@ -74,6 +74,8 @@ Agent::Action MyAI::getAction(int number) {
     ready = isReady();
     updateChangeFlag();
 
+
+    //todo error here 5/19 after minimal AI, before draft AI, doesnt check numbers > 1
     if (!ready) {
         // if found a 0, UNCOVER neighbors
         if (number == 0) {
@@ -81,7 +83,7 @@ Agent::Action MyAI::getAction(int number) {
             returnAction = uncoverNeighbor();
         }
             // if found a 1, loop through the board to find a covered tile that is attached to a 0
-        else if (number == 1) {
+        else { //5/19 changed from else if == 1 to else because if should restart the search if the number uncovered != 0
             returnAction = findCovered();
         }
 
@@ -327,7 +329,7 @@ bool MyAI::flagThemTiles(int c, int r, int flagNum) {
 void MyAI::updateChangeFlag() {
     for (int r = 0; r < rowDimension; r++) {
         for (int c = 0; c < colDimension; c++) {
-            if (myBoard[c][r].changeNumber > 0) {
+            if (myBoard[c][r].uncovered) {
                 myBoard[c][r].changeNumber = myBoard[c][r].ogNumber - flagTouchingNum(c, r);
                 if (mydebug)
                     printMyWorldInfo();
