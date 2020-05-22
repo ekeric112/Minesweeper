@@ -12,6 +12,7 @@
 #include <set>
 #include <algorithm>
 #include <iomanip>      // setw
+#include <chrono>   // time
 
 using namespace std;
 
@@ -33,21 +34,17 @@ public:
 
     ~MyAI(); //Deconstructor
 
-
+    Tile **myBoard; // create our own board
     Action getAction(int number) override;
     Action uncoverNeighbor(); // UNCOVER the first neighbor that is covered
     Action findCovered(); // walk through the board to find the first covered && next_to_zero tile
-    bool isReady(); //might have to combine this function somewhere else if it takes up too much time
+    Action guess();
+
     bool isInBounds(int c, int r);
-
-
-    Tile **myBoard; // create our own board
+    bool isReady(); // might have to combine this function somewhere else if it takes up too much time
     bool ready = false; // all tiles attached to 0 are uncovered?
-    int unCoveredCount; //how many times we returned uncovered
-
-    //Prints myboard
-    void printMyWorldInfo();
-
+    int unCoveredCount; // how many times we returned uncovered
+    void printMyWorldInfo(); // prints myboard
     void printTileInfo(int c, int r);
 
     /**
@@ -57,7 +54,6 @@ public:
      * @return how many flags are touching that tile
      */
     int flagTouchingNum(int c, int r);
-
     /**
      * Function for finding out how many covered tiles are touching a given tile at r, c
      * @param r Row

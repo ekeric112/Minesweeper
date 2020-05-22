@@ -18,14 +18,6 @@
 // ======================================================================
 
 
-/*
- * 4/22/2020: Eric: try to finish implementing constructor
- * Shangyi: come up with functions that should be inside getAction
- *
- *
- */
-
-
 #include "MyAI.hpp"
 
 
@@ -54,13 +46,11 @@ Agent::Action MyAI::getAction(int number) {
         unCoveredCount++;
     }
 
-
     //dont return flag, unflag
     //just uncover colDim*rowDim - totalMines, then leave
     if (unCoveredCount == (colDimension * rowDimension - totalMines)) {
         return {LEAVE, -1, -1};
     }
-
 
     //once ready, return these values
     int returnX = -1;
@@ -73,7 +63,6 @@ Agent::Action MyAI::getAction(int number) {
     }
     ready = isReady();
     updateChangeFlag();
-
 
     //todo error here 5/19 after minimal AI, before draft AI, doesnt check numbers > 1
     if (!ready) {
@@ -90,27 +79,13 @@ Agent::Action MyAI::getAction(int number) {
         return returnAction;
     }
 
-    /*
-     * TODO: When it is flagged, the "uncover" is false. Watch out for this
-     * READY
-     *
-     * Ready: all covered tiles that are touching a zero are uncovered. Now, find all the tiles with a number of one
-     * that are only touching one tile.u
-     *
-     * in our version of flagging, we dont actually return the the flag "action". we flag it in MyBoard
-     * and then return the next uncover
-     */
-
-
-
+    // ready
     for (int r = 0; r < rowDimension; r++) {
         for (int c = 0; c < colDimension; c++) {
             //do something based off of the number on the square, for now only case: 1
-
             if (myBoard[c][r].changeNumber > 0 && myBoard[c][r].changeNumber == coverSquareTouchingNum(c, r)) {
                 bool work = flagThemTiles(c, r, myBoard[c][r].changeNumber);
                 if (mydebug) {
-
                     printMyWorldInfo();
                 }
                 if (!work) {
@@ -119,13 +94,12 @@ Agent::Action MyAI::getAction(int number) {
                 //after putting down flags, change changenumber of everyone
                 updateChangeFlag();
             }
-
-
         }
     }
-    //after exiting for loop, all tiles in board have their correct changeNumber values
-    return findCovered();
+    // after exiting for loop, all tiles in board have their correct changeNumber values
 
+    // do not need bool stuck(), findCovered() will check if we are stuck anyways
+    return findCovered();
 
     return {LEAVE, -1, -1};
 
@@ -155,6 +129,7 @@ Agent::Action MyAI::uncoverNeighbor() {
     return findCovered();
 }
 
+
 // walk through the board to find a covered & next_to_zero tile, then UNCOVER it
 Agent::Action MyAI::findCovered() {
 
@@ -180,7 +155,13 @@ Agent::Action MyAI::findCovered() {
                 }
             }
 
-    ready = true; // do not find any covered tile that is attached to a 0, ready to do the logic part
+    if (!ready) {
+        ready = true; // do not find any covered tile that is attached to a 0, ready to do the logic part
+    }
+    // we will not get stuck when we are not ready, so when ready && nothing to uncover, we guess
+    else {
+        return guess();
+    }
 }
 
 bool MyAI::isInBounds(int c, int r) {
@@ -230,6 +211,7 @@ void MyAI::printTileInfo(int c, int r) {
 
 }
 
+// counting unmber of flags
 int MyAI::flagTouchingNum(int c, int r) {
     int flagsTouchingCount = 0;
     int dir[8][2] = {{-1, 1},
@@ -292,9 +274,9 @@ bool MyAI::isReady() {
                     }
                 }
             }
-
     return true; // do not find any covered tile that is attached to a 0, ready to do the logic part
 }
+
 
 bool MyAI::flagThemTiles(int c, int r, int flagNum) {
     int flagGood = false;
@@ -336,6 +318,14 @@ void MyAI::updateChangeFlag() {
             }
         }
     }
-
 }
 
+// just random guess
+Agent::Action MyAI::guess() {
+    int c, r;
+     do {
+         r = rand() % rowDimension;
+         c = rand() % colDimension;
+     } while (myBoard[c][r].uncovered);
+     return {UNCOVER, c, r};
+}

@@ -47,13 +47,6 @@
 
 
 
-
-
-
-
-
-
-
 #include <iostream>
 #include <dirent.h>
 #include <cmath>
