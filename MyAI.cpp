@@ -160,6 +160,7 @@ Agent::Action MyAI::findCovered() {
     }
     // we will not get stuck when we are not ready, so when ready && nothing to uncover, we guess
     else {
+        stuck = true;
         return guess();
     }
 }

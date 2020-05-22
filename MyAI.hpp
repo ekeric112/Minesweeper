@@ -43,6 +43,7 @@ public:
     bool isInBounds(int c, int r);
     bool isReady(); // might have to combine this function somewhere else if it takes up too much time
     bool ready = false; // all tiles attached to 0 are uncovered?
+    bool stuck = false;
     int unCoveredCount; // how many times we returned uncovered
     void printMyWorldInfo(); // prints myboard
     void printTileInfo(int c, int r);
