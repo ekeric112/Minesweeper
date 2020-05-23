@@ -161,7 +161,7 @@ Agent::Action MyAI::findCovered() {
     // we will not get stuck when we are not ready, so when ready && nothing to uncover, we guess
     else {
         stuck = true;
-        return guess();
+        return guess()；
     }
 }
 
@@ -321,7 +321,7 @@ void MyAI::updateChangeFlag() {
     }
 }
 
-// just random guess
+// random guess
 Agent::Action MyAI::guess() {
     int c, r;
      do {
