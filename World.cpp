@@ -128,7 +128,7 @@ int World::run() {
             perceptNumber = -1;
         //TODO current problem is that we take an extra move
         lastAction = agent->getAction(perceptNumber);
-        agent->printMyWorldInfo();
+//        agent->printMyWorldInfo();
 
         // Make the move
         gameOver = doMove();

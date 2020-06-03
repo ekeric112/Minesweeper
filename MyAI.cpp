@@ -40,6 +40,7 @@ MyAI::MyAI(int _rowDimension, int _colDimension, int _totalMines, int _agentX, i
 
 
 Agent::Action MyAI::getAction(int number) {
+    stuck = false;
     Action returnAction;
     //if the previous action returned a number >= 0, then it was an uncover action
     if (number >= 0) {
@@ -58,11 +59,14 @@ Agent::Action MyAI::getAction(int number) {
 
     myBoard[agentX][agentY].uncovered = true;
     myBoard[agentX][agentY].ogNumber = number;
-    if (!ready) { //TODO might? cause bug later. Before we are ready, changenumber = ognumber
-        myBoard[agentX][agentY].changeNumber = number;
-    }
+//    if (!ready) { //TODO might? cause bug later. Before we are ready, changenumber = ognumber
+    myBoard[agentX][agentY].changeNumber = number;
+//    }
     ready = isReady();
-    updateChangeFlag();
+    updateTiles();
+    if (mydebug) {
+        printMyWorldInfo();
+    }
 
     //todo error here 5/19 after minimal AI, before draft AI, doesnt check numbers > 1
     if (!ready) {
@@ -80,6 +84,7 @@ Agent::Action MyAI::getAction(int number) {
     }
 
     // ready
+    //put necessary flags down
     for (int r = 0; r < rowDimension; r++) {
         for (int c = 0; c < colDimension; c++) {
             //do something based off of the number on the square, for now only case: 1
@@ -92,18 +97,22 @@ Agent::Action MyAI::getAction(int number) {
                     cout << "error in flagtiles\n";
                 }
                 //after putting down flags, change changenumber of everyone
-                updateChangeFlag();
+                updateTiles();
             }
         }
     }
     // after exiting for loop, all tiles in board have their correct changeNumber values
 
     // do not need bool stuck(), findCovered() will check if we are stuck anyways
+
+    //if it goes through the entire board and there is not a tile that is touching a guarenteed mine, we are stuck
+
     return findCovered();
 
     return {LEAVE, -1, -1};
 
 }
+
 
 // iterate 8 neighbours around a tile, UNCOVER the first covered neighbor
 Agent::Action MyAI::uncoverNeighbor() {
@@ -129,9 +138,57 @@ Agent::Action MyAI::uncoverNeighbor() {
     return findCovered();
 }
 
+Agent::Action MyAI::stuckGuess() {
+    //stuck state solution:
+    /*
+     * take the number / squares it is touching
+     * ex: 1 touching 2 squares: 0.5
+     * ex: 1 touching 4 squares: 0.25 -> a bigger probability is better
+     *
+     * so if stuck, loop through board and keep track of largest tile coord prob
+     * in the end, guess one of the tiles that it is touching
+     */
+    int maxRow, maxCol;
+    double maxProb = 0;
+    for (int r = 0; r < rowDimension; r++) {
+        for (int c = 0; c < colDimension; c++) {
+            if (myBoard[c][r].changeNumber != 0 && myBoard[c][r].prob > maxProb) {
+                maxRow = r;
+                maxCol = c;
+                maxProb = myBoard[c][r].prob;
+            }
+        }
+    }
+    //now, maxRow and maxCol contain the item
+
+//    if (!myBoard[c][r].uncovered && !myBoard[c][r].flag)
+    int dir[8][2] = {{-1, 1},
+                     {-1, 0},
+                     {-1, -1},
+                     {0,  1},
+                     {0,  -1},
+                     {1,  1},
+                     {1,  0},
+                     {1,  -1}};
+    for (int *i : dir) {
+        int nc = maxCol + i[0];
+        int nr = maxRow + i[1];
+        if (isInBounds(nc, nr) && !myBoard[nc][nr].uncovered && !myBoard[nc][nr].flag) {
+            agentX = nc;
+            agentY = nr;
+            return {UNCOVER, nc, nr};
+        }
+    }
+
+//    cout << "Error in stuck guess\n";
+    //usually if it hits this spot, theres a random spot surrounded by mines
+    return guess();
+}
+
 
 // walk through the board to find a covered & next_to_zero tile, then UNCOVER it
 Agent::Action MyAI::findCovered() {
+    //first check if we are in the stuck state
 
     for (int r = 0; r < rowDimension; r++)
         for (int c = 0; c < colDimension; c++)
@@ -157,12 +214,10 @@ Agent::Action MyAI::findCovered() {
 
     if (!ready) {
         ready = true; // do not find any covered tile that is attached to a 0, ready to do the logic part
+    } else {
+        return stuckGuess();
     }
     // we will not get stuck when we are not ready, so when ready && nothing to uncover, we guess
-    else {
-        stuck = true;
-        return guess()；
-    }
 }
 
 bool MyAI::isInBounds(int c, int r) {
@@ -200,9 +255,9 @@ void MyAI::printTileInfo(int c, int r) {
     string tileString;
 
     if (myBoard[c][r].uncovered) {
-        tileString.append(to_string(myBoard[c][r].ogNumber));
+        tileString.append(to_string((int) myBoard[c][r].ogNumber));
         tileString.append("/");
-        tileString.append(to_string(myBoard[c][r].changeNumber));
+        tileString.append(to_string((int) myBoard[c][r].changeNumber));
     } else if (myBoard[c][r].flag)
         tileString.append("#");
     else
@@ -213,8 +268,8 @@ void MyAI::printTileInfo(int c, int r) {
 }
 
 // counting unmber of flags
-int MyAI::flagTouchingNum(int c, int r) {
-    int flagsTouchingCount = 0;
+double MyAI::flagTouchingNum(int c, int r) {
+    double flagsTouchingCount = 0;
     int dir[8][2] = {{-1, 1},
                      {-1, 0},
                      {-1, -1},
@@ -234,8 +289,9 @@ int MyAI::flagTouchingNum(int c, int r) {
     return flagsTouchingCount;
 }
 
-int MyAI::coverSquareTouchingNum(int c, int r) {
-    int coveredCount = 0;
+
+double MyAI::coverSquareTouchingNum(int c, int r) {
+    double coveredCount = 0;
     int dir[8][2] = {{-1, 1},
                      {-1, 0},
                      {-1, -1},
@@ -280,7 +336,7 @@ bool MyAI::isReady() {
 
 
 bool MyAI::flagThemTiles(int c, int r, int flagNum) {
-    int flagGood = false;
+    bool flagGood = false;
     int tilesFlagged = 0;
     int dir[8][2] = {{-1, 1},
                      {-1, 0},
@@ -309,11 +365,19 @@ bool MyAI::flagThemTiles(int c, int r, int flagNum) {
 
 }
 
-void MyAI::updateChangeFlag() {
+void MyAI::updateTiles() {
+    //updates the change number and the prob
     for (int r = 0; r < rowDimension; r++) {
         for (int c = 0; c < colDimension; c++) {
             if (myBoard[c][r].uncovered) {
                 myBoard[c][r].changeNumber = myBoard[c][r].ogNumber - flagTouchingNum(c, r);
+
+                //it should only have this number if not /0 or 0
+                if (myBoard[c][r].changeNumber != 0 && coverSquareTouchingNum(c, r) != 0) {
+                    myBoard[c][r].prob = myBoard[c][r].changeNumber / coverSquareTouchingNum(c, r);
+
+                }
+
                 if (mydebug)
                     printMyWorldInfo();
             }
@@ -324,9 +388,17 @@ void MyAI::updateChangeFlag() {
 // random guess
 Agent::Action MyAI::guess() {
     int c, r;
-     do {
-         r = rand() % rowDimension;
-         c = rand() % colDimension;
-     } while (myBoard[c][r].uncovered);
-     return {UNCOVER, c, r};
+    //find a random square, if it is uncovered, get new coord
+    do {
+        r = rand() % rowDimension;
+        c = rand() % colDimension;
+    } while (myBoard[c][r].uncovered || myBoard[c][r].flag);
+    //set the agents coord before returning
+    agentX = c;
+    agentY = r;
+    return {UNCOVER, c, r};
 }
+
+
+
+

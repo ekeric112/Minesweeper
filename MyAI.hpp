@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <iomanip>      // setw
 #include <chrono>   // time
+#include <iomanip>
 
 using namespace std;
 
@@ -26,8 +27,9 @@ public:
         bool uncovered = false; // the tile uncovered or not
         bool flag = false; // the tile has been flag or not
         //numbers set to -1 for error checking if needed
-        int ogNumber = -1;     // original number of tile
-        int changeNumber = -1; //OG number - # of flags it is touching
+        double ogNumber = -1;     // original number of tile
+        double changeNumber = -1; //OG number - # of flags it is touching
+        double prob = -1; //changenumber/number of covered tiles it is touching
     };
 
     MyAI(int _rowDimension, int _colDimension, int _totalMines, int _agentX, int _agentY);
@@ -39,6 +41,7 @@ public:
     Action uncoverNeighbor(); // UNCOVER the first neighbor that is covered
     Action findCovered(); // walk through the board to find the first covered && next_to_zero tile
     Action guess();
+    Action stuckGuess();
 
     bool isInBounds(int c, int r);
     bool isReady(); // might have to combine this function somewhere else if it takes up too much time
@@ -54,14 +57,16 @@ public:
      * @param c Col
      * @return how many flags are touching that tile
      */
-    int flagTouchingNum(int c, int r);
+    double flagTouchingNum(int c, int r);
+
+
     /**
      * Function for finding out how many covered tiles are touching a given tile at r, c
      * @param r Row
      * @param c Col
      * @return how many covered tiles are touching that tile
      */
-    int coverSquareTouchingNum(int c, int r);
+    double coverSquareTouchingNum(int c, int r);
 
 
     /**
@@ -74,9 +79,9 @@ public:
     bool flagThemTiles(int c, int r, int flagNum);
 
     /**
-     * Goes through the entire myboard and updates each tile's changeFlag
+     * Goes through the entire myboard and updates each tile's changeFlag and prob #
      */
-    void updateChangeFlag();
+    void updateTiles();
 
 };
 
